@@ -51,7 +51,7 @@
     </div>
 
     <div id="message" class="small" style="margin-top:12px;">
-      Paste your Google Sheet CSV link into SHEET_CSV_URL in the script.
+      <!-- Paste your Google Sheet CSV link into SHEET_CSV_URL in the script. -->
     </div>
 
     <div id="results"></div>
@@ -96,7 +96,7 @@ function parseCSV(csv){
 
 function loadFromCSVUrl(url){
   https://docs.google.com/spreadsheets/d/e/2PACX-1vRdh0z63647PEPfeK8N0_2mAFRyjAwSALYr-K1TjvtA3lKgkC7CMNeYYy9DZVkG-AqxNR0MVvzyJf80/pub?gid=194925296&single=true&output=csv = url;
-  showMessage("Loading data...");
+  showMessage("Захиалгыг шинэчилж байна");
   return fetch(url,{cache:"no-store"})
     .then(r=>{ if(!r.ok) throw new Error("Failed: "+r.status); return r.text(); })
     .then(text=>{
