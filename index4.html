@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Shipment Tracker</title>
+<style>
+  :root {
+    --accent:#0ea5a1;
+    --bg:#f7faf9;
+    --card:#ffffff;
+  }
+  body {
+    font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    margin:0;
+    background:var(--bg);
+    color:#0f172a;
+  }
+  .wrap { max-width:920px; margin:28px auto; padding:18px; }
+  h1 { margin:0; font-size:22px; }
+  .card { background:var(--card); border-radius:12px; padding:18px; box-shadow:0 6px 20px rgba(2,6,23,0.06); margin-top:16px; }
+  .controls { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center; }
+  input[type="search"] { flex:1; padding:10px 12px; border:1px solid #e6eef0; border-radius:8px; font-size:15px; }
+  button { background:var(--accent); color:white; border:0; padding:10px 14px; border-radius:8px; cursor:pointer; }
+  table { width:100%; border-collapse:collapse; margin-top:16px; }
+  th, td { padding:10px; border-bottom:1px solid #eef2f7; text-align:left; font-size:14px; }
+  th { background:#f9fafb; font-weight:600; }
+  .small { font-size:13px; color:#64748b; }
+  .muted { color:#94a3b8; }
+  .status-delivered { color:green; font-weight:700; }
+  .status-pending { color:orange; font-weight:700; }
+  .status-cancelled { color:red; font-weight:700; }
+  .status-shipped { color:#0ea5a1; font-weight:700; }
+  @media(max-width:600px){ th,td { font-size:13px; padding:8px; } h1 { font-size:19px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Shipment Tracker</h1>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <!-- <div class="small">Data source: <span id="datasource" class="muted">not set</span></div> -->
+      <!-- <div id="lastupdated" class="small muted">—</div> -->
+    </div>
+
+    <div class="controls">
+      <input id="q" type="search" placeholder="Захиалгын дугаараа оруулна уу" />
+      <button id="btnSearch">Хайх</button>
+      <button id="btnReload" title="Reload CSV">Шинэчлэх</button>
+    </div>
+
+    <div id="message" class="small" style="margin-top:12px;">
+      Paste your Google Sheet CSV link into SHEET_CSV_URL in the script.
+    </div>
+
+    <div id="results"></div>
+  </div>
+</div>
+
+<script>
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdh0z63647PEPfeK8N0_2mAFRyjAwSALYr-K1TjvtA3lKgkC7CMNeYYy9DZVkG-AqxNR0MVvzyJf80/pub?gid=194925296&single=true&output=csv";
+const TRACK_COLUMN = "Order number";
+const STATUS_COLUMN = "status";
+
+const $ = sel => document.querySelector(sel);
+let dataRows = [];
+
+function showMessage(txt, error=false){
+  const m = $("#message");
+  m.textContent = txt;
+  m.style.color = error ? "#b91c1c" : "#475569";
+}
+
+function parseCSV(csv){
+  const lines=[]; let cur='', inQ=false;
+  for (let i=0;i<csv.length;i++){
+    const ch = csv[i];
+    if(ch=='"'){ inQ=!inQ; continue;}
+    if(ch=='\r') continue;
+    if(ch=='\n' && !inQ){ lines.push(cur); cur=''; continue;}
+    cur+=ch;
+  }
+  if(cur) lines.push(cur);
+  return lines.map(line=>{
+    const cols=[]; let cell='', inside=false;
+    for(let c of line){
+      if(c=='"'){ inside=!inside; continue; }
+      if(c==',' && !inside){ cols.push(cell); cell=''; }
+      else cell+=c;
+    }
+    cols.push(cell);
+    return cols;
+  });
+}
+
+function loadFromCSVUrl(url){
+  https://docs.google.com/spreadsheets/d/e/2PACX-1vRdh0z63647PEPfeK8N0_2mAFRyjAwSALYr-K1TjvtA3lKgkC7CMNeYYy9DZVkG-AqxNR0MVvzyJf80/pub?gid=194925296&single=true&output=csv = url;
+  showMessage("Loading data...");
+  return fetch(url,{cache:"no-store"})
+    .then(r=>{ if(!r.ok) throw new Error("Failed: "+r.status); return r.text(); })
+    .then(text=>{
+      const parsed = parseCSV(text);
+      const headers = parsed[0].map(x=>x.trim());
+      dataRows = parsed.slice(1).map(r=>{
+        const obj={};
+        for(let i=0;i<headers.length;i++){ obj[headers[i]]=r[i]?r[i].trim():""; }
+        return obj;
+      });
+      // $('#lastupdated').textContent = "Rows: "+dataRows.length;
+      showMessage("");
+    })
+    .catch(err=>{ showMessage("Error loading CSV: "+err.message,true); });
+}
+
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function buildDisplayRows(rows){
+  if(!rows.length) return `<div class="muted" style="margin-top:14px;">Захиалга олдсонгүй.</div>`;
+  const keys = [TRACK_COLUMN, STATUS_COLUMN, "Pick date"];
+  let html = `<table><thead><tr>`;
+  keys.forEach(k=>html+=`<th>${escapeHtml(k)}</th>`);
+  html += `</tr></thead><tbody>`;
+  for(const r of rows){
+    let statusClass = '';
+    const st = r[STATUS_COLUMN] ? r[STATUS_COLUMN].toLowerCase() : '';
+    if(st.includes("delivered")) statusClass="status-delivered";
+    else if(st.includes("pending")) statusClass="status-pending";
+    else if(st.includes("cancelled")) statusClass="status-cancelled";
+    else if(st.includes("shipped")) statusClass="status-shipped";
+
+    html+=`<tr>`;
+    html+=`<td>${escapeHtml(r[TRACK_COLUMN])}</td>`;
+    html+=`<td class="${statusClass}">${escapeHtml(r[STATUS_COLUMN])}</td>`;
+    html+=`<td>${escapeHtml(r["Pick date"])}</td>`;
+    html+=`</tr>`;
+  }
+  html+=`</tbody></table>`;
+  return html;
+}
+
+function doSearch(){
+  const q = ($("#q").value||"").trim();
+  if(!q){ $('#results').innerHTML=`<div class="muted" style="margin-top:14px;">Захиалгын дугаараа оруулна уу.</div>`; return; }
+
+  const firstRow = dataRows[0]||{};
+  const exampleValue = firstRow[TRACK_COLUMN]||"";
+  if(q.length !== exampleValue.length){
+    showMessage(`Захиалгын дугаар ${exampleValue.length} оронтой байх ёстой`, true);
+    $('#results').innerHTML="";
+    return;
+  } else { showMessage(""); }
+
+  const matches = dataRows.filter(r => r[TRACK_COLUMN] === q);
+  $('#results').innerHTML = buildDisplayRows(matches);
+}
+
+/* UI events */
+$("#btnSearch").addEventListener("click", doSearch);
+$("#btnReload").addEventListener("click", ()=>loadFromCSVUrl(SHEET_CSV_URL));
+$("#q").addEventListener("keydown", e=>{ if(e.key==="Enter") doSearch(); });
+
+loadFromCSVUrl(SHEET_CSV_URL);
+</script>
+</body>
+</html>
