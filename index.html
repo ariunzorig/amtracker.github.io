@@ -117,7 +117,7 @@ function escapeHtml(s){ return (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'
 
 function buildDisplayRows(rows){
   if(!rows.length) return `<div class="muted" style="margin-top:14px;">Захиалга олдсонгүй.</div>`;
-  const keys = [TRACK_COLUMN, STATUS_COLUMN, "Pick date", "Physical ship day", "Хүргэхээр төлөвлсөн огноо"];
+  const keys = [TRACK_COLUMN, STATUS_COLUMN, "Цуглуулалт хийсэн огноо", "Хүргэсэн огноо", "Хүргэхээр төлөвлсөн огноо"];
   let html = `<table><thead><tr>`;
   keys.forEach(k=>html+=`<th>${escapeHtml(k)}</th>`);
   html += `</tr></thead><tbody>`;
@@ -132,8 +132,8 @@ function buildDisplayRows(rows){
     html+=`<tr>`;
     html+=`<td>${escapeHtml(r[TRACK_COLUMN])}</td>`;
     html+=`<td class="${statusClass}">${escapeHtml(r[STATUS_COLUMN])}</td>`;
-    html+=`<td>${escapeHtml(r["Pick date"])}</td>`;
-    html+=`<td>${escapeHtml(r["Physical ship day"])}</td>`;
+    html+=`<td>${escapeHtml(r["Цуглуулалт хийсэн огноо"])}</td>`;
+    html+=`<td>${escapeHtml(r["Хүргэсэн огноо"])}</td>`;
     html+=`<td>${escapeHtml(r["Хүргэхээр төлөвлсөн огноо"])}</td>`;
     html+=`</tr>`;
   }
