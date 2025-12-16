@@ -117,7 +117,7 @@ function escapeHtml(s){ return (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'
 
 function buildDisplayRows(rows){
   if(!rows.length) return `<div class="muted" style="margin-top:14px;">Захиалга олдсонгүй.</div>`;
-  const keys = [TRACK_COLUMN, STATUS_COLUMN, "Pick date"];
+  const keys = [TRACK_COLUMN, STATUS_COLUMN, "Pick date", "Physical ship day", "Хүргэхээр төлөвлсөн огноо"];
   let html = `<table><thead><tr>`;
   keys.forEach(k=>html+=`<th>${escapeHtml(k)}</th>`);
   html += `</tr></thead><tbody>`;
