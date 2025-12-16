@@ -133,6 +133,8 @@ function buildDisplayRows(rows){
     html+=`<td>${escapeHtml(r[TRACK_COLUMN])}</td>`;
     html+=`<td class="${statusClass}">${escapeHtml(r[STATUS_COLUMN])}</td>`;
     html+=`<td>${escapeHtml(r["Pick date"])}</td>`;
+    html+=`<td>${escapeHtml(r["Physical ship day"])}</td>`;
+    html+=`<td>${escapeHtml(r["Хүргэхээр төлөвлсөн огноо"])}</td>`;
     html+=`</tr>`;
   }
   html+=`</tbody></table>`;
