@@ -6,7 +6,7 @@
 <title>Захиалга хайх</title>
 <style>
   :root {
-    --accent:#0ea5a1;
+    --accent:#ee3a24;
     --bg:#f7faf9;
     --card:#ffffff;
   }
@@ -14,17 +14,17 @@
     font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
     margin:0;
     background:var(--bg);
-    color:#0f172a;
+    color:#797b7d;
   }
   .wrap { max-width:920px; margin:28px auto; padding:18px; }
   h1 { margin:0; font-size:22px; }
-  .card { background:var(--card); border-radius:12px; padding:18px; box-shadow:0 6px 20px rgba(2,6,23,0.06); margin-top:16px; }
+  .card { background:var(--card);  padding:18px; box-shadow:0 6px 20px rgba(2,6,23,0.06); margin-top:16px; }
   .controls { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center; }
-  input[type="search"] { flex:1; padding:10px 12px; border:1px solid #e6eef0; border-radius:8px; font-size:15px; }
-  button { background:var(--accent); color:white; border:0; padding:10px 14px; border-radius:8px; cursor:pointer; }
+  input[type="search"] { flex:1; padding:10px 12px; border:1px solid #e6eef0;  font-size:15px; }
+  button { background:var(--accent); color:white; border:0; padding:10px 14px; cursor:pointer; }
   table { width:100%; border-collapse:collapse; margin-top:16px; }
   th, td { padding:10px; border-bottom:1px solid #eef2f7; text-align:left; font-size:14px; }
-  th { background:#f9fafb; font-weight:600; }
+  td { background:#f9fafb; font-weight:600; }
   .small { font-size:13px; color:#64748b; }
   .muted { color:#94a3b8; }
   .status-delivered { color:green; font-weight:700; }
@@ -32,10 +32,27 @@
   .status-cancelled { color:red; font-weight:700; }
   .status-shipped { color:#0ea5a1; font-weight:700; }
   @media(max-width:600px){ th,td { font-size:13px; padding:8px; } h1 { font-size:19px; } }
+  .vertical-table th {
+  background-color: #eef3ff;   /* light highlight */
+  font-weight: 600;
+  background-color: #ee3a24;
+  color: white;
+  padding: 8px;
+  width: 40%;
+  border-right: 1px solid #ddd;
+}
 </style>
 </head>
 <body>
+
+
+
 <div class="wrap">
+  <div class="logo" style="display: flex; margin: 50px 0; padding: 0 20px;">
+    <img src="https://i.ibb.co/YTwhPRct/amway-png.png" alt="amway-png" height="60" >
+    <img src="https://i.ibb.co/xqnM20dn/mll-png.png" alt="mll-png" style="margin-left: auto;"height="50">
+  </div>
+
   <h1>Захиалга хайх</h1>
 
   <div class="card">
@@ -116,30 +133,53 @@ function loadFromCSVUrl(url){
 function escapeHtml(s){ return (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function buildDisplayRows(rows){
-  if(!rows.length) return `<div class="muted" style="margin-top:14px;">Захиалга олдсонгүй.</div>`;
-  const keys = [TRACK_COLUMN, STATUS_COLUMN, "Цуглуулалт хийсэн огноо", "Хүргэсэн огноо", "Хүргэхээр төлөвлсөн огноо"];
-  let html = `<table><thead><tr>`;
-  keys.forEach(k=>html+=`<td>${escapeHtml(k)}</td>`);
-  html += `</tr></thead><tbody>`;
+  if(!rows.length) {
+    return `<div class="muted" style="margin-top:14px;">Захиалга олдсонгүй.</div>`;
+  }
+
+  const keys = [
+    TRACK_COLUMN,
+    STATUS_COLUMN,
+    "Цуглуулалт хийсэн огноо",
+    "Хүргэсэн огноо",
+    "Хүргэхээр төлөвлсөн огноо"
+  ];
+
+  let html = ``;
+
   for(const r of rows){
     let statusClass = '';
     const st = r[STATUS_COLUMN] ? r[STATUS_COLUMN].toLowerCase() : '';
-    if(st.includes("delivered")) statusClass="status-delivered";
-    else if(st.includes("pending")) statusClass="status-pending";
-    else if(st.includes("cancelled")) statusClass="status-cancelled";
-    else if(st.includes("shipped")) statusClass="status-shipped";
 
-    html+=`<tr>`;
-    html+=`<td>${escapeHtml(r[TRACK_COLUMN])}</td>`;
-    html+=`<td class="${statusClass}">${escapeHtml(r[STATUS_COLUMN])}</td>`;
-    html+=`<td>${escapeHtml(r["Цуглуулалт хийсэн огноо"])}</td>`;
-    html+=`<td>${escapeHtml(r["Хүргэсэн огноо"])}</td>`;
-    html+=`<td>${escapeHtml(r["Хүргэхээр төлөвлсөн огноо"])}</td>`;
-    html+=`</tr>`;
+    if(st.includes("delivered")) statusClass = "status-delivered";
+    else if(st.includes("pending")) statusClass = "status-pending";
+    else if(st.includes("cancelled")) statusClass = "status-cancelled";
+    else if(st.includes("shipped")) statusClass = "status-shipped";
+
+    html += `<table class="vertical-table"><tbody>`;
+
+    keys.forEach(k => {
+      let value = r[k] || '';
+
+      let valueCell = escapeHtml(value);
+      if(k === STATUS_COLUMN){
+        valueCell = `<span class="${statusClass}">${escapeHtml(value)}</span>`;
+      }
+
+      html += `
+        <tr>
+          <th>${escapeHtml(k)}</th>
+          <td>${valueCell}</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table><br/>`;
   }
-  html+=`</tbody></table>`;
+
   return html;
 }
+
 
 function doSearch(){
   const q = ($("#q").value||"").trim();
