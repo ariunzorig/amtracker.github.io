@@ -119,7 +119,7 @@ function buildDisplayRows(rows){
   if(!rows.length) return `<div class="muted" style="margin-top:14px;">Захиалга олдсонгүй.</div>`;
   const keys = [TRACK_COLUMN, STATUS_COLUMN, "Цуглуулалт хийсэн огноо", "Хүргэсэн огноо", "Хүргэхээр төлөвлсөн огноо"];
   let html = `<table><thead><tr>`;
-  keys.forEach(k=>html+=`<th>${escapeHtml(k)}</th>`);
+  keys.forEach(k=>html+=`<td>${escapeHtml(k)}</td>`);
   html += `</tr></thead><tbody>`;
   for(const r of rows){
     let statusClass = '';
