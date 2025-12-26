@@ -112,7 +112,7 @@ function parseCSV(csv){
 }
 
 function loadFromCSVUrl(url){
-  https://docs.google.com/spreadsheets/d/e/2PACX-1vRdh0z63647PEPfeK8N0_2mAFRyjAwSALYr-K1TjvtA3lKgkC7CMNeYYy9DZVkG-AqxNR0MVvzyJf80/pub?gid=194925296&single=true&output=csv = url;
+  https://docs.google.com/spreadsheets/d/e/2PACX-1vTPPPULFFEbJyUOix4NZQ94FUgW8XwbU4k8pHN_q0tJRyrrtZmbTjXfzQBo_FUt5egjPCj2K5vCNH46/pub?gid=1594754797&single=true&output=csv = url;
   showMessage("Захиалгыг шинэчилж байна");
   return fetch(url,{cache:"no-store"})
     .then(r=>{ if(!r.ok) throw new Error("Failed: "+r.status); return r.text(); })
@@ -140,9 +140,9 @@ function buildDisplayRows(rows){
   const keys = [
     TRACK_COLUMN,
     STATUS_COLUMN,
-    "Цуглуулалт хийсэн огноо",
-    "Хүргэсэн огноо",
-    "Хүргэхээр төлөвлсөн огноо"
+    "Агуулахд бэлтгэгдсэн огноо",
+    "Хүргэгдсэн огноо",
+    "Хүргэхээр төлөвлөсөн огноо"
   ];
 
   let html = ``;
@@ -154,7 +154,7 @@ function buildDisplayRows(rows){
     if(st.includes("Хүргэгдсэн")) statusClass = "status-delivered";
     else if(st.includes("Түгээлтэнд гарсан")) statusClass = "status-pending";
     else if(st.includes("Хүргэгдсэн")) statusClass = "status-shipped";
-    else if(st.includes("Хүргэгдсэн")) statusClass = "status-cancelled";
+    else if(st.includes("Цуцлагдсан")) statusClass = "status-cancelled";
 
     html += `<table class="vertical-table"><tbody>`;
 
